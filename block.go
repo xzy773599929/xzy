@@ -39,15 +39,25 @@ func NewBlock(data string,PrevBlockHash []byte)*Block  {
 //生成哈希值
 func (block *Block)SetHash()  {
 	//拼装数据
-	blcokInfo := append(block.PrevHash,block.Data...)
+	/*blcokInfo := append(block.PrevHash,block.Data...)
 	blcokInfo = append(blcokInfo,block.MerkleRoot...)
 	blcokInfo = append(blcokInfo,Uint64ToByte(block.Version)...)
 	blcokInfo = append(blcokInfo,Uint64ToByte(block.TimeStamp)...)
 	blcokInfo = append(blcokInfo,Uint64ToByte(block.Difficult)...)
-	blcokInfo = append(blcokInfo,Uint64ToByte(block.Nonce)...)
+	blcokInfo = append(blcokInfo,Uint64ToByte(block.Nonce)...)*/
 
+	temp := [][]byte{
+		block.PrevHash,
+		block.MerkleRoot,
+		Uint64ToByte(block.Version),
+		Uint64ToByte(block.TimeStamp),
+		Uint64ToByte(block.Difficult),
+		Uint64ToByte(block.Nonce),
+		block.Data,
+	}
+	blockInfo := bytes.Join(temp,[]byte{})
 	//sha256
-	hash := sha256.Sum256(blcokInfo)
+	hash := sha256.Sum256(blockInfo)
 	block.Hash = hash[:]
 }
 
