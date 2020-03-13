@@ -21,3 +21,9 @@ func NewProofOfWork(block *Block)*ProofOfWork  {
 	pow.target = &bigIntTmp
 	return &pow
 }
+
+//不断运行计算哈希函数
+func (pow *ProofOfWork)Run()([]byte,uint64)  {
+	//TODO
+	return []byte("sssssss"),10
+}

@@ -32,20 +32,20 @@ func NewBlock(data string,PrevBlockHash []byte)*Block  {
 		Hash:     []byte{},
 		Data:     []byte(data),
 	}
-	block.SetHash()
+	//block.SetHash()
+	//创建一个pow对象
+	pow := NewProofOfWork(&block)
+	//不断查找随机数，不断进行哈希运算
+	hash,nonce := pow.Run()
+	//根据挖矿结果对区块数据进行更新
+	block.Hash = hash
+	block.Nonce = nonce
 	return &block
 }
 
 //生成哈希值
 func (block *Block)SetHash()  {
 	//拼装数据
-	/*blcokInfo := append(block.PrevHash,block.Data...)
-	blcokInfo = append(blcokInfo,block.MerkleRoot...)
-	blcokInfo = append(blcokInfo,Uint64ToByte(block.Version)...)
-	blcokInfo = append(blcokInfo,Uint64ToByte(block.TimeStamp)...)
-	blcokInfo = append(blcokInfo,Uint64ToByte(block.Difficult)...)
-	blcokInfo = append(blcokInfo,Uint64ToByte(block.Nonce)...)*/
-
 	temp := [][]byte{
 		block.PrevHash,
 		block.MerkleRoot,
