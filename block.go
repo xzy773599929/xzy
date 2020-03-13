@@ -4,6 +4,9 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"encoding/binary"
+	"encoding/gob"
+	"fmt"
+	"os"
 	"time"
 )
 
@@ -61,10 +64,41 @@ func (block *Block)SetHash()  {
 	block.Hash = hash[:]
 }
 
-//block类型转换成[]byte类型
-func (block *Block)ToByte() []byte {
-	//TODO
-	return []byte{}
+//block类型转换成[]byte类型，序列化
+func (block *Block)Serialize() []byte {
+	//使用gob进行序列化（编码）得到字节流
+	var buffer bytes.Buffer
+	//定义一个编码器
+	encode := gob.NewEncoder(&buffer)
+	//使用编码器进行编码
+	err := encode.Encode(&block)
+	if err != nil {
+		fmt.Println("编码失败:",err)
+		os.Exit(1)
+	}
+	return buffer.Bytes()
+}
+
+//反序列化
+func Deserialize(data []byte) Block {
+	var buffer bytes.Buffer
+	var block Block
+
+	//将data写入buffer
+	_,err := buffer.Write(data)
+	if err != nil {
+		fmt.Println("buffer.Read failed:",err)
+		os.Exit(1)
+	}
+	//创建decoder
+	decoder := gob.NewDecoder(&buffer)
+	//将buffer数据转换成block
+	err = decoder.Decode(&block)
+	if err != nil {
+		fmt.Println("decode failed:",err)
+		os.Exit(1)
+	}
+	return block
 }
 
 //创世区块

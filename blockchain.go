@@ -34,10 +34,11 @@ func NewBlockChain() *BlockChain  {
 			if err != nil {
 				log.Panic("创建bucket(b1)失败！")
 			}
-			gensisBlock := GenesisBlock()
-			bucket.Put(gensisBlock.Hash, gensisBlock.ToByte())
-			bucket.Put([]byte("LastHashKey"), gensisBlock.Hash)
-			lastHash = gensisBlock.Hash
+			genesisBlock := GenesisBlock()
+			bucket.Put(genesisBlock.Hash, genesisBlock.Serialize())
+			bucket.Put([]byte("LastHashKey"), genesisBlock.Hash)
+			//赋值最后一个区块哈希值
+			lastHash = genesisBlock.Hash
 		}else {
 			lastHash = bucket.Get([]byte("LastHashKey"))
 		}
