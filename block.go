@@ -61,6 +61,12 @@ func (block *Block)SetHash()  {
 	block.Hash = hash[:]
 }
 
+//block类型转换成[]byte类型
+func (block *Block)ToByte() []byte {
+	//TODO
+	return []byte{}
+}
+
 //创世区块
 func GenesisBlock() *Block {
 	return NewBlock("创世区块",[]byte{})
