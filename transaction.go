@@ -1,7 +1,14 @@
 package main
 
+import (
+	"bytes"
+	"crypto/sha256"
+	"encoding/gob"
+	"log"
+)
+
 //1.定义交易结构
-type transaction struct {
+type Transaction struct {
 	//交易ID
 	TXID []byte
 	//交易输入数组
@@ -24,6 +31,21 @@ type TXOutput struct {
 	Value float64
 	//锁定脚本，用地址模拟
 	PubKeyHash string
+}
+
+//设置交易ID
+func (tx *Transaction)SetHash()  {
+	var buffer bytes.Buffer
+	//创建一个gob编码器，进行序列化
+	encoder := gob.NewEncoder(&buffer)
+	err := encoder.Encode(tx)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	data := buffer.Bytes()
+	hash := sha256.Sum256(data)
+	tx.TXID = hash[:]
 }
 
 
