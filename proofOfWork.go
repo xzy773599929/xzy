@@ -42,7 +42,8 @@ func (pow *ProofOfWork)Run()([]byte,uint64)  {
 			Uint64ToByte(block.TimeStamp),
 			Uint64ToByte(block.Difficult),
 			Uint64ToByte(nonce),
-			block.Data,
+			//只对区块头做哈希，区块体通过梅克尔根产生影响
+			//block.Data,
 		}
 		blockInfo := bytes.Join(temp,[]byte{})
 		//2.进行哈希运算

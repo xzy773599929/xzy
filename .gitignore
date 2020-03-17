@@ -1,3 +1,5 @@
 .idea
 .blockChain.db
+.blockChain.db.lock
 .block.exe
+.run.bat

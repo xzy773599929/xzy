@@ -75,5 +75,4 @@ func NewCoinBase(address string,data string)*Transaction  {
 
 	return &tx
 }
-//3.创建挖矿交易
 

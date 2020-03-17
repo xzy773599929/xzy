@@ -11,8 +11,10 @@ type CLI struct {
 }
 //提示语，提示可用命令
 const Usage = `
-	addBlock --data DATA			"add data to blockchain"
-	printChain			"print all blockchain data"
+	addBlock --data DATA			"添加区块"
+	printChain			"打印区块链"
+	printChainR			"反向打印区块链"
+	getBalance --address ADDRESS			"指定地址查找余额"
 `
 
 func (cli *CLI)Run()  {
@@ -38,8 +40,26 @@ func (cli *CLI)Run()  {
 			fmt.Println(Usage)
 		}
 	case "printChain":
+		fmt.Println("正向打印区块链")
 		//打印区块
 		cli.PrintBlockChain()
+	case "printChainR":
+		fmt.Println("反向打印区块链")
+		//反向打印区块
+		cli.PrintBlockChainReverse()
+	case "getBalance":
+		//指定地址获取余额
+		//确认参数正确
+		if len(args) == 4 && args[2] == "--address" {
+			fmt.Println("获取余额")
+			//获取地址
+			address := args[3]
+			//获取余额
+			cli.GetBalance(address)
+		}else {
+			fmt.Println("请输入正确的地址参数")
+			fmt.Println(Usage)
+		}
 	default:
 		fmt.Println(Usage)
 	}

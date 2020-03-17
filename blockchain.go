@@ -14,7 +14,7 @@ type BlockChain struct {
 const blockBucket  = "blockBucket"
 const blockChainDB  = "blockChain.db"
 //定义一个区块链
-func NewBlockChain() *BlockChain  {
+func NewBlockChain(address string) *BlockChain  {
 	//创建一个创世区块，并添加到区块链
 	var lastHash []byte
 	//1.打开数据库
@@ -34,7 +34,7 @@ func NewBlockChain() *BlockChain  {
 			if err != nil {
 				log.Panic("创建bucket(b1)失败！")
 			}
-			genesisBlock := GenesisBlock()
+			genesisBlock := GenesisBlock(address)
 			bucket.Put(genesisBlock.Hash, genesisBlock.Serialize())
 			bucket.Put([]byte("LastHashKey"), genesisBlock.Hash)
 			//赋值最后一个区块哈希值
@@ -48,7 +48,7 @@ func NewBlockChain() *BlockChain  {
 }
 
 // 添加区块
-func (bc *BlockChain)AddBlock(data string)  {
+func (bc *BlockChain)AddBlock(txs []*Transaction)  {
 	//获取前一个区块哈希值
 	db := bc.db //区块链数据库
 	lasthash := bc.tail //当前链中最后一个哈希值
@@ -62,7 +62,7 @@ func (bc *BlockChain)AddBlock(data string)  {
 		}
 
 		//a.创建新的区块
-		block := NewBlock(data,lasthash)
+		block := NewBlock(txs,lasthash)
 
 		//b.添加区块到区块链中
 		//key为block哈希值，value为block的序列化
@@ -74,4 +74,12 @@ func (bc *BlockChain)AddBlock(data string)  {
 
 		return nil
 	})
+}
+
+//找到指定地址的所有UTXO
+func (bc *BlockChain)FindUTXOs(address string)[]TXOutput  {
+	var UTXO []TXOutput
+	//TODO
+
+	return UTXO
 }

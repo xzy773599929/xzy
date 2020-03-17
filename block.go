@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"crypto/sha256"
 	"encoding/binary"
 	"encoding/gob"
 	"fmt"
@@ -19,12 +18,13 @@ type Block struct {
 	Difficult uint64 //难度值
 	Nonce uint64 //随机数，挖矿时要找的数
 	Hash []byte  //当前区块哈希
-	Data []byte  //数据
-
+	//Data []byte  //数据
+	//真实的交易数据
+	Transactions []*Transaction
 }
 
 //2 .	 创建区块
-func NewBlock(data string,PrevBlockHash []byte)*Block  {
+func NewBlock(txs []*Transaction,PrevBlockHash []byte)*Block  {
 	block := Block{
 		Version:    00,
 		PrevHash:   PrevBlockHash,
@@ -32,9 +32,10 @@ func NewBlock(data string,PrevBlockHash []byte)*Block  {
 		TimeStamp:  uint64(time.Now().Unix()),
 		Difficult:  100,
 		Nonce:      100,
-		Hash:     []byte{},
-		Data:     []byte(data),
+		Hash:       []byte{},
+		Transactions: txs,
 	}
+	block.MerkleRoot = block.MakeMerkelRoot()
 	//block.SetHash()
 	//创建一个pow对象
 	pow := NewProofOfWork(&block)
@@ -46,7 +47,7 @@ func NewBlock(data string,PrevBlockHash []byte)*Block  {
 	return &block
 }
 
-//生成哈希值
+/*//生成哈希值
 func (block *Block)SetHash()  {
 	//拼装数据
 	temp := [][]byte{
@@ -62,7 +63,7 @@ func (block *Block)SetHash()  {
 	//sha256
 	hash := sha256.Sum256(blockInfo)
 	block.Hash = hash[:]
-}
+}*/
 
 //block类型转换成[]byte类型，序列化
 func (block *Block)Serialize() []byte {
@@ -102,8 +103,9 @@ func Deserialize(data []byte) Block {
 }
 
 //创世区块
-func GenesisBlock() *Block {
-	return NewBlock("创世区块",[]byte{})
+func GenesisBlock(address string) *Block {
+	coinbase := NewCoinBase(address,"创世区块")
+	return NewBlock([]*Transaction{coinbase},[]byte{})
 }
 
 //辅助函数，将uint6464转换成[]byte
@@ -115,4 +117,10 @@ func Uint64ToByte(num uint64)[]byte  {
 		panic(err)
 	}
 	return buffer.Bytes()
+}
+
+//模拟计算MerkelRoot
+func (block *Block)MakeMerkelRoot() []byte{
+	//TODO
+	return []byte{}
 }
