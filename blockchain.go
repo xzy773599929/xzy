@@ -2,7 +2,6 @@ package main
 
 import (
 	"Block/bolt"
-	"fmt"
 	"log"
 )
 
@@ -82,7 +81,7 @@ func (bc *BlockChain)FindUTXOs(address string)[]TXOutput  {
 	var UTXO []TXOutput
 	//定义一个map来保存消费过的output，key是这个交易的id，value是这个交易中的索引值的数组,因为一笔交易可能有多个output都是同个地址的
 	//map[交易id][]索引值
-	spentOutput := make(map[string][]int64)
+	spentOutputs := make(map[string][]int64)
 	//创建迭代器
 	it := bc.NewIterator()
 	for {
@@ -91,9 +90,20 @@ func (bc *BlockChain)FindUTXOs(address string)[]TXOutput  {
 		//2.遍历交易
 		for _,tx := range block.Transactions {
 
+		OUTPUT:
 			//3.遍历output，找到和自己地址相关的utxo（在添加output之前检查是否已经消耗过）
 			for i,output := range tx.TXOutputs {
-				fmt.Printf("corrent index %d\n",i)
+				//在这里做一个过滤，过滤消耗过的output，进行对比
+				//如果相同，则不添加
+				//如果当前交易的id已存在于map的key中，则说明这个交易里有消耗过的output
+				if spentOutputs[string(tx.TXID)] != nil  {
+					for _,j := range spentOutputs[string(tx.TXID)] {
+						if int64(i) == j {
+							//相等说明当前output已经消耗了，不再添加
+							continue OUTPUT
+						}
+					}
+				}
 
 				//这个output和我们的目标地址相同，满足条件，添加到UTXO数组中
 				if output.PubKeyHash == address {
@@ -101,12 +111,15 @@ func (bc *BlockChain)FindUTXOs(address string)[]TXOutput  {
 				}
 			}
 
-			//4.遍历input，找到自己花费过的utxo集合（把自己消耗过的标记出来）
-			for _,input := range tx.TXInputs {
-				//判断当前input的签名是否属于自己，如果和自己的地址一致，说明这个消费是自己的
-				if input.Sig == address {
-					indexArray := spentOutput[string(input.TXid)]
-					indexArray = append(indexArray,input.Index)
+			//如果当前交易是挖矿交易的话，那么直接跳过，不做遍历
+			if !tx.IsCoinbase() {
+				//4.遍历input，找到自己花费过的utxo集合（把自己消耗过的标记出来）
+				for _,input := range tx.TXInputs {
+					//判断当前input的签名是否属于自己，如果和自己的地址一致，说明这个消费是自己的
+					if input.Sig == address {
+						indexArray := spentOutputs[string(input.TXid)]
+						indexArray = append(indexArray,input.Index)
+					}
 				}
 			}
 		}
@@ -115,8 +128,5 @@ func (bc *BlockChain)FindUTXOs(address string)[]TXOutput  {
 			break
 		}
 	}
-
-
-
 	return UTXO
 }

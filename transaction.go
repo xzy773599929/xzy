@@ -23,7 +23,7 @@ type Transaction struct {
 type TXInput struct {
 	//引用的交易ID
 	TXid []byte
-	//引用的Output所引值
+	//引用的Output索引值
 	Index int64
 	//解锁脚本，用地址模拟
 	Sig string
@@ -49,6 +49,20 @@ func (tx *Transaction)SetHash()  {
 	data := buffer.Bytes()
 	hash := sha256.Sum256(data)
 	tx.TXID = hash[:]
+}
+
+//实现一个函数，判断当前交易是否挖矿交易,如果是就返回true
+func (tx *Transaction)IsCoinbase()bool  {
+	//1.交易input只有一个
+	if len(tx.TXInputs) == 1 {
+		input := tx.TXInputs[0]
+		//2.交易id为空
+		//3.交易的index为-1
+		if bytes.Equal(input.TXid,[]byte{}) && input.Index == -1 {
+			return true
+		}
+	}
+	return false
 }
 
 //2.提供创建交易的方法
