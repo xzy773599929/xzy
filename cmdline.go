@@ -36,7 +36,7 @@ func (cli *CLI)PrintBlockChainReverse()  {
 	bc := cli.bc
 	//创建迭代器
 	it := bc.NewIterator()
-	//开始循环读取数据库数据
+	//先利用i获取区块链长度
 	i := 1
 	for {
 		block := it.Next()
@@ -45,7 +45,7 @@ func (cli *CLI)PrintBlockChainReverse()  {
 		}
 		i += 1
 	}
-
+	//定义数组blocks，将区块逐个放入
 	blocks := make([]*Block,i)
 	it1 := bc.NewIterator()
 	l := 0
@@ -56,6 +56,7 @@ func (cli *CLI)PrintBlockChainReverse()  {
 		}
 		l += 1
 	}
+	//遍历数组，将区块反向打印
 	for m := len(blocks)-1 ; i >= 0 ; i-- {
 		fmt.Printf("\n============================区块高度:%d\n",m)
 		fmt.Printf("版本号:%d\n",blocks[m].Version)
