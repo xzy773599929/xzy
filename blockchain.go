@@ -130,3 +130,14 @@ func (bc *BlockChain)FindUTXOs(address string)[]TXOutput  {
 	}
 	return UTXO
 }
+
+//寻找交易所需UTXOs
+func (bc *BlockChain)FindNeedUXTOs(from string,amount float64)(map[string][]uint64,float64) {
+	//找到的utxo集合
+	var utxos map[string][]uint64
+	//找到的utxo里面包含的余额总数
+	var cacl float64
+
+	//TODO
+	return utxos,cacl
+}
