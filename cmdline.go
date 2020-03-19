@@ -1,6 +1,8 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func (cli *CLI)AddBlock(data string)  {
 	//cli.bc.AddBlock(data)
@@ -8,6 +10,7 @@ func (cli *CLI)AddBlock(data string)  {
 	fmt.Println("区块写入成功！")
 }
 
+//打印区块链
 func (cli *CLI)PrintBlockChain()  {
 	bc := cli.bc
 	//创建迭代器
@@ -81,4 +84,14 @@ func (cli *CLI)GetBalance(address string) {
 		total += utxo.Value
 	}
 	fmt.Printf("\"%s\"余额为:%f\n",address,total)
+}
+
+//转账交易
+func (cli *CLI)send(from,to string,amount float64,miner,data string)  {
+	fmt.Printf("from:%s\n",from)
+	fmt.Printf("to:%s\n",to)
+	fmt.Printf("amount:%f\n",amount)
+	fmt.Printf("miner:%s\n",miner)
+	fmt.Printf("data:%s\n",data)
+	//TODO
 }

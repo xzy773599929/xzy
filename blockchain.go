@@ -2,6 +2,7 @@ package main
 
 import (
 	"Block/bolt"
+	"fmt"
 	"log"
 )
 
@@ -176,9 +177,13 @@ func (bc *BlockChain)FindNeedUXTOs(from string,amount float64)(map[string][]uint
 						//3.比较一下是否满足转账需求
 						//	a.满足的话直接返回utxos，cacl
 						//	b.不满足继续统计
-						if cacl > amount {
+						if cacl >= amount {
+							//break
+							fmt.Printf("找到了满足的金额:%f\n",cacl)
 							return utxos,cacl
 						}
+					}else {
+						fmt.Printf("不满足转账金额，当前总额:%f,  目标总额:%f\n",cacl,amount)
 					}
 				}
 			}
