@@ -15,10 +15,21 @@ func (cli *CLI)PrintBlockChain()  {
 	bc := cli.bc
 	//创建迭代器
 	it := bc.NewIterator()
+	//先利用i获取区块链长度
+	itx := bc.NewIterator()
+	i := 1
+	for {
+		blockx := itx.Next()
+		if len(blockx.PrevHash) == 0 {
+			break
+		}
+		i += 1
+	}
 	//开始循环读取数据库数据bl
 	for {
 		block := it.Next()
-		fmt.Printf("\n============================\n")
+		fmt.Printf("\n============================区块高度:%d\n",i-1)
+		i = i-1
 		fmt.Printf("版本号:%d\n",block.Version)
 		fmt.Printf("前一区块哈希:%x\n",block.PrevHash)
 		fmt.Printf("梅克尔根:%x\n",block.MerkleRoot)
@@ -60,8 +71,8 @@ func (cli *CLI)PrintBlockChainReverse()  {
 		l += 1
 	}
 	//遍历数组，将区块反向打印
-	for m := len(blocks)-1 ; i >= 0 ; i-- {
-		fmt.Printf("\n============================区块高度:%d\n",m)
+	for m := len(blocks)-1 ; m >= 0 ; m-- {
+		fmt.Printf("\n============================区块高度:%d\n",len(blocks)-1-m)
 		fmt.Printf("版本号:%d\n",blocks[m].Version)
 		fmt.Printf("前一区块哈希:%x\n",blocks[m].PrevHash)
 		fmt.Printf("梅克尔根:%x\n",blocks[m].MerkleRoot)
@@ -94,4 +105,14 @@ func (cli *CLI)send(from,to string,amount float64,miner,data string)  {
 	fmt.Printf("miner:%s\n",miner)
 	fmt.Printf("data:%s\n",data)
 	//TODO
+	//1.创建挖矿交易
+	coinbase := NewCoinBase(miner,data)
+	//2.创建普通交易
+	transaction := NewTransaction(from,to,amount,cli.bc)
+	if transaction == nil {
+		return
+	}
+	//3.添加区块
+	cli.bc.AddBlock([]*Transaction{coinbase,transaction})
+	fmt.Println("转账成功!")
 }

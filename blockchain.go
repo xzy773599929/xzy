@@ -120,6 +120,7 @@ func (bc *BlockChain)FindUTXOs(address string)[]TXOutput  {
 					if input.Sig == address {
 						indexArray := spentOutputs[string(input.TXid)]
 						indexArray = append(indexArray,input.Index)
+						spentOutputs[string(input.TXid)] = indexArray
 					}
 				}
 			}
@@ -135,7 +136,7 @@ func (bc *BlockChain)FindUTXOs(address string)[]TXOutput  {
 //寻找交易所需UTXOs
 func (bc *BlockChain)FindNeedUXTOs(from string,amount float64)(map[string][]uint64,float64) {
 	//找到的utxo集合
-	var utxos map[string][]uint64
+	utxos := make(map[string][]uint64)
 	//找到的utxo里面包含的余额总数
 	var cacl float64
 
@@ -196,6 +197,7 @@ func (bc *BlockChain)FindNeedUXTOs(from string,amount float64)(map[string][]uint
 					if input.Sig == from {
 						indexArray := spentOutputs[string(input.TXid)]
 						indexArray = append(indexArray,input.Index)
+						spentOutputs[string(input.TXid)] = indexArray
 					}
 				}
 			}

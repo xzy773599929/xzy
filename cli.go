@@ -68,7 +68,7 @@ func (cli *CLI)Run()  {
 		if len(args) == 7 {
 			from := args[2]
 			to := args[3]
-			amount,_ := strconv.ParseFloat(args[4],64) // 字符串转float64
+			amount,_ := strconv.ParseFloat(args[4],64) // 字符串转float
 			miner := args[5]
 			data := args[6]
 			cli.send(from,to,amount,miner,data)
