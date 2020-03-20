@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"encoding/binary"
 	"encoding/gob"
 	"fmt"
@@ -121,6 +122,11 @@ func Uint64ToByte(num uint64)[]byte  {
 
 //模拟计算MerkelRoot
 func (block *Block)MakeMerkelRoot() []byte{
-	//TODO
-	return []byte{}
+	txs := block.Transactions
+	var info []byte
+	for _,tx := range txs {
+		info = append(info, tx.TXID...)
+	}
+	hash := sha256.Sum256(info)
+	return hash[:]
 }

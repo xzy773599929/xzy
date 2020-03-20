@@ -2,13 +2,8 @@ package main
 
 import (
 	"fmt"
+	"time"
 )
-
-func (cli *CLI)AddBlock(data string)  {
-	//cli.bc.AddBlock(data)
-	//TODO
-	fmt.Println("区块写入成功！")
-}
 
 //打印区块链
 func (cli *CLI)PrintBlockChain()  {
@@ -33,7 +28,8 @@ func (cli *CLI)PrintBlockChain()  {
 		fmt.Printf("版本号:%d\n",block.Version)
 		fmt.Printf("前一区块哈希:%x\n",block.PrevHash)
 		fmt.Printf("梅克尔根:%x\n",block.MerkleRoot)
-		fmt.Printf("时间戳:%d\n",block.TimeStamp)
+		timeFormat := time.Unix(int64(block.TimeStamp),0).Format("2006-02-02 15:04:05")
+		fmt.Printf("时间戳:%s\n",timeFormat)
 		fmt.Printf("难度值:%d\n",block.Difficult)
 		fmt.Printf("随机数:%d\n",block.Nonce)
 		fmt.Printf("当前区块哈希:%x\n",block.Hash)
@@ -76,7 +72,8 @@ func (cli *CLI)PrintBlockChainReverse()  {
 		fmt.Printf("版本号:%d\n",blocks[m].Version)
 		fmt.Printf("前一区块哈希:%x\n",blocks[m].PrevHash)
 		fmt.Printf("梅克尔根:%x\n",blocks[m].MerkleRoot)
-		fmt.Printf("时间戳:%d\n",blocks[m].TimeStamp)
+		timeFormat := time.Unix(int64(blocks[m].TimeStamp),0).Format("2006-02-02 15:04:05")
+		fmt.Printf("时间戳:%s\n",timeFormat)
 		fmt.Printf("难度值:%d\n",blocks[m].Difficult)
 		fmt.Printf("随机数:%d\n",blocks[m].Nonce)
 		fmt.Printf("当前区块哈希:%x\n",blocks[m].Hash)
@@ -104,7 +101,7 @@ func (cli *CLI)send(from,to string,amount float64,miner,data string)  {
 	fmt.Printf("amount:%f\n",amount)
 	fmt.Printf("miner:%s\n",miner)
 	fmt.Printf("data:%s\n",data)
-	//TODO
+
 	//1.创建挖矿交易
 	coinbase := NewCoinBase(miner,data)
 	//2.创建普通交易
