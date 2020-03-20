@@ -13,9 +13,9 @@ import (
 //定义钱包结构体，每一个钱包保存了私钥公钥对
 type Wallet struct {
 	//私钥
-	privateKey *ecdsa.PrivateKey
+	PrivateKey *ecdsa.PrivateKey
 	//公钥，这里不是保存原始公钥，而是公钥结构体中的X和Y拼接的字符串，在校验时重新拆分（参考r，s传递)
-	pubKey []byte
+	PubKey []byte
 }
 
 //创建钱包函数
@@ -32,15 +32,15 @@ func NewWallet() *Wallet {
 	pubKey := append(pubKeyOrig.X.Bytes(),pubKeyOrig.Y.Bytes()...)
 	//创建钱包
 	wallet := Wallet{
-		privateKey: privateKey,
-		pubKey:     pubKey,
+		PrivateKey: privateKey,
+		PubKey:     pubKey,
 	}
 	return &wallet
 }
 
 //生成地址
 func (w *Wallet)NewAddress()string {
-	pubKey := w.pubKey
+	pubKey := w.PubKey
 	version := byte(00)
 	//a.对公钥进行哈希处理：RIPEMD160（sha256())
 	ripemdHash := HashPubkey(pubKey)

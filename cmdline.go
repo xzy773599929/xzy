@@ -127,3 +127,12 @@ func (cli *CLI)newWallet()  {
 	//fmt.Printf("私钥:%v\n",wallet.privateKey)
 	//fmt.Printf("公钥:%v\n",wallet.pubKey)
 }
+
+//获取钱包所有地址
+func (cli *CLI)ListAllAddress()  {
+	ws := NewWallets()
+	addresses := ws.ListAllAddress()
+	for _,address := range addresses {
+		fmt.Printf("地址:%s\n",address)
+	}
+}

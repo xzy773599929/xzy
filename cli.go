@@ -17,6 +17,7 @@ const Usage = `
 	getBalance --address ADDRESS			"指定地址查找余额"
 	send FROM TO AMOUNT MINER DATA		"由FROM转AMOUNT金额给TO，由MINER挖矿，同时写入DATA"
 	newWallet			"创建一个新钱包"
+	listAddress			"显示所有地址"
 `
 
 func (cli *CLI)Run()  {
@@ -79,6 +80,9 @@ func (cli *CLI)Run()  {
 	case "newWallet":
 		fmt.Println("正在创建钱包...")
 		cli.newWallet()
+	case "listAddresses":
+		fmt.Println("正在获取所有地址...")
+		cli.ListAllAddress()
 	default:
 		fmt.Println("无效的命令!")
 		fmt.Println(Usage)
