@@ -113,3 +113,12 @@ func (cli *CLI)send(from,to string,amount float64,miner,data string)  {
 	cli.bc.AddBlock([]*Transaction{coinbase,transaction})
 	fmt.Println("转账成功!")
 }
+
+//创建新钱包
+func (cli *CLI)newWallet()  {
+	wallet := NewWallet()
+	address := wallet.NewAddress()
+	fmt.Printf("私钥:%v\n",wallet.privateKey)
+	fmt.Printf("公钥:%v\n",wallet.pubKey)
+	fmt.Printf("地址:%s\n",address)
+}
