@@ -20,10 +20,7 @@ func NewWallets() *Wallets  {
 	var	ws	Wallets
 	ws.WalletsMap	=	make(map[string]*Wallet)
 	//加载
-	err	:=	ws.loadFile()
-	if	err	!=	nil	{
-		log.Panic(err)
-	}
+	ws.loadFile()
 	return	&ws
 }
 
@@ -55,24 +52,27 @@ func (ws *Wallets)saveToFile()  {
 }
 
 //读取文件方法，把所有的wallet读出来
-func (ws *Wallets)loadFile()error{
+func (ws *Wallets)loadFile(){
+	//读取之前，确认文件是否存在
 	_,	err	:=	os.Stat("wallet.dat")
 	if	os.IsNotExist(err)	{
-		return	err
+		ws.WalletsMap = make(map[string]*Wallet)
+		return
 	}
-	content,	err	:=	ioutil.ReadFile("wallet.dat")
+	//读取文件
+	content,err	:=	ioutil.ReadFile("wallet.dat")
 	if	err	!=	nil	{
-		return	err
+		log.Panic(err)
 	}
 	var	wsLocal	Wallets
+	//解码
 	gob.Register(elliptic.P256())
 	decoder	:=	gob.NewDecoder(bytes.NewReader(content))
 	err	=	decoder.Decode(&wsLocal)
 	if	err	!=	nil	{
-		return	err
+		log.Panic(err)
 	}
-	ws.WalletsMap	=	wsLocal.WalletsMap
-	return	nil
+	ws.WalletsMap = wsLocal.WalletsMap
 }
 
 //获取所有地址

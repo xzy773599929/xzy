@@ -132,7 +132,7 @@ func (cli *CLI)newWallet()  {
 func (cli *CLI)ListAllAddress()  {
 	ws := NewWallets()
 	addresses := ws.ListAllAddress()
-	for _,address := range addresses {
-		fmt.Printf("地址:%s\n",address)
+	for i,address := range addresses {
+		fmt.Printf("地址%d:%s\n",i+1,address)
 	}
 }
