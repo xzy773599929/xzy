@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/elliptic"
 	"encoding/gob"
+	"fmt"
 	"github.com/btcsuite/btcutil/base58"
 	"io/ioutil"
 	"log"
@@ -93,4 +94,21 @@ func GetPubKeyHashFromAddress(address string)[]byte  {
 	length := len(pubKeyBytes)
 	pubKeyHash := pubKeyBytes[1:length-4]
 	return pubKeyHash
+}
+
+//校验地址有效性
+func IsValidAddress(address string)bool {
+	//1.逆向求出pubKeyHash数据
+	pubKeyHash := base58.Decode(address)
+	if len(pubKeyHash) < 4 {
+		return false
+	}
+	//2.得到version + 哈希1 部分，并做checksum运算
+	payload := pubKeyHash[:len(pubKeyHash)-4]
+	checksum1 := pubKeyHash[len(pubKeyHash)-4:]
+	fmt.Printf("checksum1:%x\n",checksum1)
+	checksum2 := checksum(payload)
+	fmt.Printf("checksum2:%x\n",checksum2)
+	//3.与实际checksum比较，如果相同，则地址有效，否则无效
+	return bytes.Equal(checksum1,checksum2)
 }

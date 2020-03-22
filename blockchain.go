@@ -17,6 +17,11 @@ const blockBucket  = "blockBucket"
 const blockChainDB  = "blockChain.db"
 //定义一个区块链
 func NewBlockChain(address string) *BlockChain  {
+	//校验地址
+	if !IsValidAddress(address) {
+		fmt.Printf("地址无效:%s\n",address)
+		panic("创世地址无效")
+	}
 	//创建一个创世区块，并添加到区块链
 	var lastHash []byte
 	//1.打开数据库

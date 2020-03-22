@@ -86,7 +86,10 @@ func (cli *CLI)PrintBlockChainReverse()  {
 func (cli *CLI)GetBalance(address string) {
 	bc := cli.bc
 	//校验地址
-	//TODO
+	if !IsValidAddress(address) {
+		fmt.Printf("地址无效:%s\n",address)
+		return
+	}
 	//先根据地址获得公钥哈希
 	pubKeyHash := GetPubKeyHashFromAddress(address)
 	utxos := bc.FindUTXOs(pubKeyHash)
@@ -105,6 +108,20 @@ func (cli *CLI)send(from,to string,amount float64,miner,data string)  {
 	fmt.Printf("amount:%f\n",amount)
 	fmt.Printf("miner:%s\n",miner)
 	fmt.Printf("data:%s\n",data)
+
+	//校验地址
+	if !IsValidAddress(from) {
+		fmt.Printf("地址无效from:%s\n",from)
+		return
+	}
+	if !IsValidAddress(to) {
+		fmt.Printf("地址无效to:%s\n",to)
+		return
+	}
+	if !IsValidAddress(miner) {
+		fmt.Printf("地址无效miner:%s\n",miner)
+		return
+	}
 
 	//1.创建挖矿交易
 	coinbase := NewCoinBase(miner,data)
