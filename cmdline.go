@@ -33,7 +33,7 @@ func (cli *CLI)PrintBlockChain()  {
 		fmt.Printf("难度值:%d\n",block.Difficult)
 		fmt.Printf("随机数:%d\n",block.Nonce)
 		fmt.Printf("当前区块哈希:%x\n",block.Hash)
-		fmt.Printf("区块内交易数据:%s\n",block.Transactions[0].TXInputs[0].Sig)
+		fmt.Printf("区块内交易数据:%s\n",block.Transactions[0].TXInputs[0].Signature)
 		if len(block.PrevHash) == 0 {
 			fmt.Println("区块链遍历完毕")
 			break
@@ -77,7 +77,7 @@ func (cli *CLI)PrintBlockChainReverse()  {
 		fmt.Printf("难度值:%d\n",blocks[m].Difficult)
 		fmt.Printf("随机数:%d\n",blocks[m].Nonce)
 		fmt.Printf("当前区块哈希:%x\n",blocks[m].Hash)
-		fmt.Printf("区块内交易数据:%s\n",blocks[m].Transactions[0].TXInputs[0].Sig)
+		fmt.Printf("区块内交易数据:%s\n",blocks[m].Transactions[0].TXInputs[0].Signature)
 	}
 	fmt.Println("区块链遍历完毕")
 }
@@ -85,7 +85,11 @@ func (cli *CLI)PrintBlockChainReverse()  {
 //指定地址获取余额
 func (cli *CLI)GetBalance(address string) {
 	bc := cli.bc
-	utxos := bc.FindUTXOs(address)
+	//校验地址
+	//TODO
+	//先根据地址获得公钥哈希
+	pubKeyHash := GetPubKeyHashFromAddress(address)
+	utxos := bc.FindUTXOs(pubKeyHash)
 	//定义总余额,遍历utxos中的value进行累加
 	total := 0.0
 	for _,utxo := range utxos {

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/elliptic"
 	"encoding/gob"
+	"github.com/btcsuite/btcutil/base58"
 	"io/ioutil"
 	"log"
 	"os"
@@ -15,7 +16,7 @@ type Wallets struct {
 	WalletsMap map[string]*Wallet
 }
 
-//创建方法
+//创建方法,返回当前所有钱包的实例
 func NewWallets() *Wallets  {
 	var	ws	Wallets
 	ws.WalletsMap	=	make(map[string]*Wallet)
@@ -23,13 +24,13 @@ func NewWallets() *Wallets  {
 	ws.loadFile()
 	return	&ws
 }
-
+//建一个新的钱包并保存到文件
 func (ws *Wallets)CreatWallet() string {
 	wallet := NewWallet()
 	address := wallet.NewAddress()
 
 	ws.WalletsMap[address] = wallet
-
+	//保存文件
 	ws.saveToFile()
 	return address
 }
@@ -82,4 +83,14 @@ func (ws *Wallets)ListAllAddress()[]string {
 		addresses = append(addresses, address)
 	}
 	return addresses
+}
+
+//封装通过地址获得公钥哈希的函数
+func GetPubKeyHashFromAddress(address string)[]byte  {
+	//1.解码
+	//2.截取出公钥哈希，去除version(1字节)和校验码(4字节)
+	pubKeyBytes := base58.Decode(address)
+	length := len(pubKeyBytes)
+	pubKeyHash := pubKeyBytes[1:length-4]
+	return pubKeyHash
 }
