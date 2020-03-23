@@ -3,11 +3,13 @@ package main
 import (
 	"bytes"
 	"crypto/ecdsa"
+	"crypto/elliptic"
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/gob"
 	"fmt"
 	"log"
+	"math/big"
 )
 
 //挖矿奖励金额
@@ -174,6 +176,10 @@ func NewTransaction(from,to string,amount float64,bc *BlockChain) *Transaction  
 
 //签名的具体实现，参数为：私钥，inputs里面所有引用的交易结构map[交易Id]Transaction
 func (tx *Transaction)Sign(private *ecdsa.PrivateKey,prevTXs map[string]Transaction) {
+	//挖矿交易不需要签名
+	if tx.IsCoinbase() {
+		return
+	}
 	//1.创建一个当前交易的txCopy：TrimmedCopy()，要把signature和PubKey字段设为nil
 	txCopy := tx.TrimmedCopy()
 	//2.循环遍历txCopy的inputs，得到这个input所引用的output的公钥哈希,将这个公钥哈希暂时填充到txCopy中的input的PubKey字段中，用于签名用
@@ -208,4 +214,49 @@ func (tx *Transaction)TrimmedCopy() Transaction  {
 		inputs = append(inputs, TXInput{input.TXid,input.Index,nil,nil})
 	}
 	return Transaction{tx.TXID,inputs,tx.TXOutputs}
+}
+
+//签名校验
+func (tx *Transaction)Verify(prevTXs map[string]Transaction)bool {
+	//挖矿交易不需要验证
+	if tx.IsCoinbase() {
+		return true
+	}
+	//1.得到签名的数据
+	txCopy := tx.TrimmedCopy()
+	//与签名时类似
+	for i ,input := range tx.TXInputs {
+		prevTx := prevTXs[string(input.TXid)]
+		if len(prevTx.TXID) == 0 {
+			log.Panic("所引用的交易无效!")
+		}
+		txCopy.TXInputs[i].PubKey = prevTx.TXOutputs[input.Index].PubKeyHash
+		txCopy.SetHash()
+		dataHash := txCopy.TXID
+		//2.得到signature，反推回r,s
+		signature := input.Signature
+		//3.拆解PubKey，X,Y得到原生公钥
+		pubKey := input.PubKey
+
+		//定义两个辅助的big.Int
+		r := big.Int{}
+		s := big.Int{}
+		//拆分signature，平均分成两半，前半部分为r，后半部分为s
+		r.SetBytes(signature[0:len(signature)/2])
+		s.SetBytes(signature[len(signature)/2:])
+
+		//定义两个辅助的big.Int
+		X := big.Int{}
+		Y := big.Int{}
+		//拆分pubKey，平均分成两半，前半部分为X，后半部分为Y
+		X.SetBytes(pubKey[0:len(pubKey)/2])
+		Y.SetBytes(pubKey[len(pubKey)/2:])
+		pubKeyOrigin := ecdsa.PublicKey{elliptic.P256(),&X,&Y}
+
+		//验证签名,如果验证失败，返回false
+		if !ecdsa.Verify(&pubKeyOrigin,dataHash,&r,&s) {
+			return false
+		}
+	}
+	return true
 }
