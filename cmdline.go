@@ -33,7 +33,10 @@ func (cli *CLI)PrintBlockChain()  {
 		fmt.Printf("难度值:%d\n",block.Difficult)
 		fmt.Printf("随机数:%d\n",block.Nonce)
 		fmt.Printf("当前区块哈希:%x\n",block.Hash)
-		fmt.Printf("区块内交易数据:%s\n",block.Transactions[0].TXInputs[0].Signature)
+		//fmt.Printf("区块内交易数据:%s\n",block.Transactions[0].TXInputs[0].PubKey)
+		for _,tx := range block.Transactions {
+			fmt.Println(tx)
+		}
 		if len(block.PrevHash) == 0 {
 			fmt.Println("区块链遍历完毕")
 			break
@@ -77,7 +80,7 @@ func (cli *CLI)PrintBlockChainReverse()  {
 		fmt.Printf("难度值:%d\n",blocks[m].Difficult)
 		fmt.Printf("随机数:%d\n",blocks[m].Nonce)
 		fmt.Printf("当前区块哈希:%x\n",blocks[m].Hash)
-		fmt.Printf("区块内交易数据:%s\n",blocks[m].Transactions[0].TXInputs[0].Signature)
+		fmt.Printf("区块内交易数据:%s\n",blocks[m].Transactions[0].TXInputs[0].PubKey)
 	}
 	fmt.Println("区块链遍历完毕")
 }
@@ -132,7 +135,6 @@ func (cli *CLI)send(from,to string,amount float64,miner,data string)  {
 	}
 	//3.添加区块
 	cli.bc.AddBlock([]*Transaction{coinbase,transaction})
-	fmt.Println("转账成功!")
 }
 
 //创建新钱包

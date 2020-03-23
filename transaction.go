@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"log"
 	"math/big"
+	"strings"
 )
 
 //挖矿奖励金额
@@ -100,8 +101,8 @@ func NewCoinBase(address string,data string)*Transaction  {
 	input := TXInput{
 		TXid:  []byte{},
 		Index: -1,
-		Signature:[]byte(data),
-		PubKey:nil,
+		Signature:nil,
+		PubKey:[]byte(data),
 	}
 	//output := TXOutput{
 	//	Value:      reward,
@@ -232,6 +233,8 @@ func (tx *Transaction)Verify(prevTXs map[string]Transaction)bool {
 		}
 		txCopy.TXInputs[i].PubKey = prevTx.TXOutputs[input.Index].PubKeyHash
 		txCopy.SetHash()
+		//还原,以免影响后面的的签名验证
+		txCopy.TXInputs[i].PubKey = nil
 		dataHash := txCopy.TXID
 		//2.得到signature，反推回r,s
 		signature := input.Signature
@@ -255,8 +258,27 @@ func (tx *Transaction)Verify(prevTXs map[string]Transaction)bool {
 
 		//验证签名,如果验证失败，返回false
 		if !ecdsa.Verify(&pubKeyOrigin,dataHash,&r,&s) {
+			fmt.Println(i)
 			return false
 		}
 	}
 	return true
+}
+
+func(tx	Transaction)String()string	{
+	var	lines	[]string
+	lines	=	append(lines,	fmt.Sprintf("---Transaction	%x:",tx.TXID))
+	for	i,	input	:=	range	tx.TXInputs	{
+		lines	=	append(lines,	fmt.Sprintf("		Input		%d:",i))
+		lines	=	append(lines,	fmt.Sprintf("		TXID:		%x",input.TXid))
+		lines	=	append(lines,	fmt.Sprintf("		Out:		%d",input.Index))
+		lines	=	append(lines,	fmt.Sprintf("		Signature:	%x",input.Signature))
+		lines	=	append(lines,	fmt.Sprintf("		PubKey:		%x",input.PubKey))
+	}
+	for	i,	output	:=	range	tx.TXOutputs{
+		lines	=	append(lines,	fmt.Sprintf("		Output		%d:",i))
+		lines	=	append(lines,	fmt.Sprintf("		Value:		%f",output.Value))
+		lines	=	append(lines,	fmt.Sprintf("		Script:		%x",output.PubKeyHash))
+	}
+	return	strings.Join(lines,	"\n")
 }

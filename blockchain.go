@@ -58,6 +58,13 @@ func NewBlockChain(address string) *BlockChain  {
 
 // 添加区块
 func (bc *BlockChain)AddBlock(txs []*Transaction)  {
+	//先校验交易是否合法
+	for i,tx := range txs {
+		if !bc.VerifyTransaction(tx) {
+			fmt.Println("矿工发现无效交易!",i)
+			return
+		}
+	}
 	//获取前一个区块哈希值
 	db := bc.db //区块链数据库
 	lasthash := bc.tail //当前链中最后一个哈希值
@@ -83,6 +90,7 @@ func (bc *BlockChain)AddBlock(txs []*Transaction)  {
 
 		return nil
 	})
+	fmt.Println("转账成功!")
 }
 
 //找到指定地址的所有UTXO
@@ -233,4 +241,25 @@ func (bc *BlockChain)SignTransaction(tx *Transaction,privateKey *ecdsa.PrivateKe
 	}
 
 	tx.Sign(privateKey,prevTXs)
+}
+
+//签名验证
+func (bc *BlockChain)VerifyTransaction(tx *Transaction)bool {
+	if tx.IsCoinbase() {
+		return true
+	}
+
+	prevTXs := make(map[string]Transaction)
+	//找到所有引用的交易
+	//1.根据inputs来找，有多少input，就遍历多少次
+	for _,input := range tx.TXInputs {
+		//2.找到目标交易（根据TXid来找）
+		txx,err := bc.FindTransactionByTXid(input.TXid)
+		if err != nil {
+			log.Panic(err)
+		}
+		//3.追加到prevTXs里面
+		prevTXs[string(input.TXid)] = txx
+	}
+	return tx.Verify(prevTXs)
 }
