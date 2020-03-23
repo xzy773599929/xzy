@@ -2,6 +2,8 @@ package main
 
 import (
 	"bytes"
+	"crypto/ecdsa"
+	"crypto/rand"
 	"crypto/sha256"
 	"encoding/gob"
 	"fmt"
@@ -128,7 +130,7 @@ func NewTransaction(from,to string,amount float64,bc *BlockChain) *Transaction  
 		return nil
 	}
 	//3.得到对应的公钥私钥
-	//privateKey := wallet.PrivateKey
+	privateKey := wallet.PrivateKey
 	pubKey := wallet.PubKey
 	//传递公钥的哈希而不是地址
 	pubKeyHash := HashPubkey(pubKey)
@@ -161,9 +163,49 @@ func NewTransaction(from,to string,amount float64,bc *BlockChain) *Transaction  
 		output := NewOutput(from, resVal - amount)
 		outputs = append(outputs, *output)
 	}
-
 	//返回交易
 	tx := Transaction{[]byte{},inputs,outputs}
 	tx.SetHash()
+	//签名
+	bc.SignTransaction(&tx,privateKey)
+
 	return &tx
+}
+
+//签名的具体实现，参数为：私钥，inputs里面所有引用的交易结构map[交易Id]Transaction
+func (tx *Transaction)Sign(private *ecdsa.PrivateKey,prevTXs map[string]Transaction) {
+	//1.创建一个当前交易的txCopy：TrimmedCopy()，要把signature和PubKey字段设为nil
+	txCopy := tx.TrimmedCopy()
+	//2.循环遍历txCopy的inputs，得到这个input所引用的output的公钥哈希,将这个公钥哈希暂时填充到txCopy中的input的PubKey字段中，用于签名用
+	for i,input := range txCopy.TXInputs {
+		prevTX := prevTXs[string(input.TXid)]
+		if len(prevTX.TXID) == 0 {
+			log.Panic("所引用的交易无效!")
+		}
+		txCopy.TXInputs[i].PubKey = prevTX.TXOutputs[input.Index].PubKeyHash
+		//3.生成要签名的数据，要签名的数据一定是一个哈希值
+			//a.对每一个input都要签名一次，签名的数据是当前input引用的output的哈希+当前的outputs(都在txCopy里面)
+			//b.要对这个拼好的txCopy进行哈希处理，SetHash得到TXID,这个TXID就是我们要签名的最终数据
+		txCopy.SetHash()
+		//还原,以免影响后面的input的签名
+		txCopy.TXInputs[i].PubKey = nil
+		signDataHash := txCopy.TXID
+		//4.执行签名动作得到r，s字节流
+		r,s,err := ecdsa.Sign(rand.Reader,private,signDataHash)
+		if err != nil {
+			log.Panic(err)
+		}
+		signature := append(r.Bytes(),s.Bytes()...)
+		//5.放到我们所签名的input的Signature中
+		tx.TXInputs[i].Signature = signature
+	}
+}
+
+//创建交易副本,把signature和PubKey字段设为nil
+func (tx *Transaction)TrimmedCopy() Transaction  {
+	var inputs []TXInput
+	for _,input := range tx.TXInputs{
+		inputs = append(inputs, TXInput{input.TXid,input.Index,nil,nil})
+	}
+	return Transaction{tx.TXID,inputs,tx.TXOutputs}
 }
